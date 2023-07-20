@@ -57,21 +57,22 @@ public class LDATopicModellingAlgorithm {
         alphabet = model.getAlphabet();
         //Extract Topics
         ArrayList<TreeSet<IDSorter>> topicWords = model.getSortedWords();
-
+        Alphabet modelAlphabet = model.getAlphabet();
         //topics ranked and added to result
         for (int topic = 0; topic < numTopics; topic++) {
             Iterator<IDSorter> iterator = topicWords.get(topic).iterator();
 
+            System.out.println("Topic " + (topic + 1) + ":");
             int rank = 0;
-            //returns the word with the highest probabilty in each topic
-            IDSorter idCountPair = iterator.next();
-            Object wordObject = alphabet.lookupObject(idCountPair.getID());
-            if(wordObject instanceof String){
-                System.out.println((String)wordObject);
+            while (iterator.hasNext() && rank < topWords) {
+                IDSorter idCountPair = iterator.next();
+                int wordId = idCountPair.getID();
+                String word = modelAlphabet.lookupObject(wordId).toString();
+                double weight = idCountPair.getWeight();
+                System.out.print(word + ",");
+                rank++;
             }
-            else if(wordObject instanceof Integer){
-                System.out.println((Integer)wordObject);
-            }
+            System.out.println("...");
         }
     }
 }
