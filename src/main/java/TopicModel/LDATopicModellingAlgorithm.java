@@ -1,0 +1,77 @@
+package TopicModel;
+import cc.mallet.pipe.*;
+import cc.mallet.topics.*;
+import cc.mallet.types.*;
+
+import java.io.IOException;
+import java.util.*;
+
+public class LDATopicModellingAlgorithm {
+    private int numTopics;
+    private int numIterations;
+    ParallelTopicModel model;
+    InstanceList instances;
+
+    //All the processing steps in a pipe
+    private Pipe[] getPreprocessingSteps() {
+        ArrayList<Pipe> pipeList = new ArrayList<>();
+
+        // Specify your preprocessing steps here
+        pipeList.add(new CharSequenceLowercase());  // Convert text to lowercase
+        pipeList.add(new CharSequence2TokenSequence());  // Tokenize the text
+
+        //removing stopwords include subject
+        ArrayList<String> stopwords = new ArrayList<>(); stopwords.add("subject");
+        TokenSequenceRemoveStopwords removeStopwords = new TokenSequenceRemoveStopwords(false);
+        removeStopwords.addStopWords(stopwords.toArray(new String[stopwords.size()]));
+        pipeList.add(removeStopwords);
+        pipeList.add(new TokenSequence2FeatureSequence());  // Convert token sequence to feature sequence
+        return pipeList.toArray(new Pipe[0]);
+    }
+
+    //constructor
+    public LDATopicModellingAlgorithm(int numTopics, int numIterations){
+        this.numTopics = numTopics;
+        this.numIterations = numIterations;
+        model = new ParallelTopicModel(numTopics);
+        instances = new InstanceList(new SerialPipes(getPreprocessingSteps()));
+    }
+
+    //add content from stream to the instance
+    public void addDocumentsToModelInstance(String text,String messageId){
+        instances.addThruPipe(new Instance(text,null,messageId,null));
+    }
+
+    public void topTopicsInCorpus(int topWords){
+        List<String> topTopics = new ArrayList<>();
+        // Set the instances for the model
+        model.addInstances(instances);
+        model.setNumThreads(4); // Set the number of threads for parallel training
+        model.setNumIterations(numIterations);
+        Alphabet alphabet;
+        try {
+            model.estimate();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        alphabet = model.getAlphabet();
+        //Extract Topics
+        ArrayList<TreeSet<IDSorter>> topicWords = model.getSortedWords();
+
+        //topics ranked and added to result
+        for (int topic = 0; topic < numTopics; topic++) {
+            Iterator<IDSorter> iterator = topicWords.get(topic).iterator();
+
+            int rank = 0;
+            //returns the word with the highest probabilty in each topic
+            IDSorter idCountPair = iterator.next();
+            Object wordObject = alphabet.lookupObject(idCountPair.getID());
+            if(wordObject instanceof String){
+                System.out.println((String)wordObject);
+            }
+            else if(wordObject instanceof Integer){
+                System.out.println((Integer)wordObject);
+            }
+        }
+    }
+}
