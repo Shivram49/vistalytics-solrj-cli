@@ -41,6 +41,14 @@
             <version>2.0.7-RC2</version>
         </dependency>
 
+        <!-- Apache Commons CSV -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.10.0</version> <!-- Replace with the latest version available -->
+        </dependency>
+
+
     </dependencies>
 
 </project>

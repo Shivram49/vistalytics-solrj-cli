@@ -33,9 +33,7 @@ public class LoadToSolr {
                 listFilesForFolder(fileEntry);
             } else {
                 count++;
-                if(count > 118979) {
-                    indexFile(fileEntry.toPath());
-                }
+                indexFile(fileEntry.toPath());
             }
         }
     }

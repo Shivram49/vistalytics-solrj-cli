@@ -1,6 +1,6 @@
 package Querying;
 
-import TopicModel.DataPreprocessor;
+import Querying.KWIC.KeywordInContext;
 import TopicModel.LDATopicModellingAlgorithm;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -10,17 +10,18 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class QueryTool {
     public static void main(String[] args) {
-        SolrClient solr = new HttpSolrClient.Builder("http://localhost:8983/solr/enron").build();
+        SolrClient solr = new HttpSolrClient.Builder("http://localhost:8983/solr/updated_enron").build();
         SolrQuery query = new SolrQuery();
-        String searchQuery = "Body:"+args[0] + " || Subject:"+args[0];
+        String inputQuery = args[0];
+//        String searchQuery = "Body:"+inputQuery + " || Subject:"+inputQuery;
+        String searchQuery = "content:"+inputQuery;
+
         query.setQuery(searchQuery);
         query.setRows(Integer.MAX_VALUE);
 
@@ -33,17 +34,24 @@ public class QueryTool {
             System.out.println("Number of Emails matching: " + numFound);
             System.out.println("Email ids in the form from -> to");
             int count = 0;
-            LDATopicModellingAlgorithm tma = new LDATopicModellingAlgorithm(10,200);
+            LDATopicModellingAlgorithm tma = new LDATopicModellingAlgorithm(10,200,"src/main/resources/ldamodel.ser");
 
+            List<String> keywordsInContext = new ArrayList<>();
             //email
             for(SolrDocument email : emails){
-//                Object fromObject = email.getFieldValue("From");
-//                Object toObject = email.getFieldValue("To");
-//                String from = "NULL `",to = "NULL";
-//                if(fromObject != null)  from = fromObject.toString().replaceAll("[\\[\\]]","");
-//                if(toObject != null) to = toObject.toString().replaceAll("[\\[\\]]","");
-//                System.out.println(++count+":"+ from+ "->" + to);
-                tma.addDocumentsToModelInstance(email.getFieldValue("Body").toString(),email.getFieldValue("Message-ID").toString());
+                Object fromObject = email.getFieldValue("From");
+                Object toObject = email.getFieldValue("To");
+                String from = "NULL `",to = "NULL";
+                if(fromObject != null)  from = fromObject.toString().replaceAll("[\\[\\]]","");
+                if(toObject != null) to = toObject.toString().replaceAll("[\\[\\]]","");
+                System.out.println(++count+":"+ from+ "->" + to);
+                tma.addDocumentsToModelInstance(email.getFieldValue("content").toString());
+                String body = email.getFieldValue("content").toString();
+               KeywordInContext kwic = new KeywordInContext(inputQuery,50,body);
+                String highlightedText = kwic.highlightKeywordInContext();
+                if(highlightedText.length() > 0)
+                    System.out.println(++count+":"+highlightedText);
+
             }
             tma.topTopicsInCorpus(10);
 

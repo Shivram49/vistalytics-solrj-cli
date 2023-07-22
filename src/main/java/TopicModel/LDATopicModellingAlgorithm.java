@@ -3,14 +3,19 @@ import cc.mallet.pipe.*;
 import cc.mallet.topics.*;
 import cc.mallet.types.*;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.*;
+import java.util.concurrent.*;
 
 public class LDATopicModellingAlgorithm {
     private int numTopics;
     private int numIterations;
-    ParallelTopicModel model;
-    InstanceList instances;
+    private ParallelTopicModel model;
+    private InstanceList instances;
+    private String modelFilePath;
+    private static int messageId = 0;
 
     //All the processing steps in a pipe
     private Pipe[] getPreprocessingSteps() {
@@ -30,18 +35,34 @@ public class LDATopicModellingAlgorithm {
     }
 
     //constructor
-    public LDATopicModellingAlgorithm(int numTopics, int numIterations){
+    public LDATopicModellingAlgorithm(int numTopics, int numIterations,String modelFilePath){
         this.numTopics = numTopics;
         this.numIterations = numIterations;
         model = new ParallelTopicModel(numTopics);
         instances = new InstanceList(new SerialPipes(getPreprocessingSteps()));
+        this.modelFilePath = modelFilePath;
     }
 
     //add content from stream to the instance
-    public void addDocumentsToModelInstance(String text,String messageId){
-        instances.addThruPipe(new Instance(text,null,messageId,null));
+    public void addDocumentsToModelInstance(String text){
+        instances.addThruPipe(new Instance(text,null,null,null));
+    }
+    public void addDocumentsToModelInstance(List<String> batch){
+        for(String text : batch)
+            instances.addThruPipe(new Instance(text,null,null,null));
     }
 
+    public void trainModel(){
+        model.addInstances(instances);
+        model.setNumThreads(4); // Set the number of threads for parallel training
+        model.setNumIterations(numIterations);
+        Alphabet alphabet;
+        try {
+            model.estimate();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     public void topTopicsInCorpus(int topWords){
         List<String> topTopics = new ArrayList<>();
         // Set the instances for the model
@@ -74,5 +95,18 @@ public class LDATopicModellingAlgorithm {
             }
             System.out.println("...");
         }
+    }
+
+
+    public void saveModel(){
+        ObjectOutputStream oos = null;
+        try {
+            oos = new ObjectOutputStream(new FileOutputStream(this.modelFilePath));
+            oos.writeObject(model);
+            oos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
