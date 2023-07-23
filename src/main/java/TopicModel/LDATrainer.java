@@ -15,11 +15,12 @@ import java.util.concurrent.*;
 public class LDATrainer {
     private String inputFileName;
     private CsvIterator csvIterator;
+    private int numTopics;
+    private int numInterations;
     private LDATopicModellingAlgorithm model;
-    private static String messageId = "0";
-    public LDATrainer(String fileName) {
+    public LDATrainer(String fileName,int numTopics,int numInterations) {
         this.inputFileName = fileName;
-        this.model = new LDATopicModellingAlgorithm(10,20,"src/main/resources/ldamodel.ser");
+        this.model = new LDATopicModellingAlgorithm(numTopics,numInterations,"src/main/resources/ldamodel.ser");
     }
     public void loadDataToModel(int batchSize){
         List<List<String>> batches = new ArrayList<>();
@@ -48,6 +49,6 @@ public class LDATrainer {
             e.printStackTrace();
         }
         System.out.println("saving model");
-        model.saveModel();
+        model.saveModel(model.getModel());
     }
 }
