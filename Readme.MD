@@ -1,4 +1,3 @@
-#Setting up the project in local
 
 Overview
 ---------
