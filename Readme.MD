@@ -20,8 +20,7 @@ Setting up solr in local
 3. Run the following commands
 
    `sudo bin/solr start -force`
-4. Create a core name updated_enron using the following command
-    
+4. Create a core name **updated_enron** using the following command
     `bin/solr create -c updated_enron`
 5. Load emails_cleaned.csv provided to this core using the following command
    
@@ -37,6 +36,7 @@ Setting up the project in local
 
 Running the project in local
 -----------------------------
+Using IDE
 1. Run the LDATester code first, this will train the model, serialize and store it in src/main/resrouces(Troubleshooting tips: make sure the module sdk >= 17)
 2. Now run the QueryTool, and do as prompted
 3. You would be able to see the following
@@ -44,15 +44,15 @@ Running the project in local
    2. Emails from and to
    3. Top k topics
 
+Running from command line
+1. Download the queryTool.jar
+2. Run the following command
+   `java -jar queryTool.jar`
 
 Test cases
 -----------
 1. Give a search term after the program starts running
    Search term = "exam"
-
-![img.png](img.png)
-
-
 2. Give the choice 1 for number of documents
 3. Give the choice 2 for from and to emails
 4. Give choice 3 for query in context
