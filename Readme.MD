@@ -47,4 +47,16 @@ Running the project in local
 
 Test cases
 -----------
-1. Run the Querytool, select the choice for number of documents
+1. Give a search term after the program starts running
+   Search term = "exam"
+
+![img.png](img.png)
+
+
+2. Give the choice 1 for number of documents
+3. Give the choice 2 for from and to emails
+4. Give choice 3 for query in context
+5. Give choice 4 for top k topics
+
+
+Test case 2 : search term = Lorry
