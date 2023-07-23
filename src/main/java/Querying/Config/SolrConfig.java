@@ -13,17 +13,19 @@ public class SolrConfig {
     private String baseSolrUrl;
     private int queryRows;
     private String searchPhrase;
+    private int numDocs;
 
     public SolrConfig(String baseSolrUrl, int queryRows) {
         this.baseSolrUrl = baseSolrUrl;
         this.queryRows = queryRows;
+        this.numDocs = 0;
     }
 
     private void setSearchPhrase(String searchPhrase) {
         this.searchPhrase = "content:" + searchPhrase;
     }
 
-    private QueryResponse getQueryResponse() throws SolrServerException, IOException {
+    public QueryResponse getQueryResponse() throws SolrServerException, IOException {
         SolrClient solr = new HttpSolrClient.Builder(this.baseSolrUrl).build();
         SolrQuery query = new SolrQuery();
         query.setQuery(this.searchPhrase);

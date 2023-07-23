@@ -4,6 +4,7 @@ import Querying.Config.SolrConfig;
 import Querying.KWIC.KeywordInContext;
 import TopicModel.LDATopicModellingAlgorithm;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 
@@ -51,7 +52,7 @@ public class QueryTool {
 
     //function to using topic model to print the top few topics
     private static void AnalyseTopics(SolrDocumentList emails) throws Exception {
-        System.out.println("Enter the number of topics you want!");
+        System.out.println("Enter the number of topics you want:\n");
         int numTopics = key.nextInt();
         System.out.println("Analysing emails...");
         LDATopicModellingAlgorithm tma = new LDATopicModellingAlgorithm(numTopics,200,"src/main/resources/ldamodel.ser");//email
@@ -64,23 +65,46 @@ public class QueryTool {
     public static void main(String[] args) {
         //search phrase entered in the command line arguements
 
+        System.out.println("Enter the Search phrase");
+        String searchPhrase = key.next();
 
-        String searchPhrase = args[0];
+        //Test case 1: Number of documents
+        //Test case 2: Emails from and to
+        //Test case 3: Top k Topics
 
-        SolrConfig solrAccess = new SolrConfig(baseUrl,queryRows);
+
         try {
-            //prints from and to emails
+            SolrConfig solrAccess = new SolrConfig(baseUrl,queryRows);
+            String choice = "1";
             SolrDocumentList emails = solrAccess.getEmails(searchPhrase);
-            System.out.println("Number of Emails matching: " + emails.getNumFound() + " Senders and recievers below\n");
-            printEmailTable(emails);
-
-            //prints query in context
-            System.out.println("\n\n\n\n\nQuery in context\n\n\n\n");
-            printQueryInContext(emails,searchPhrase);
-
-            //Analyse emails
-            AnalyseTopics(emails);
-
+            while(choice.equals("1") || choice.equals("2") || choice.equals("3")){
+                System.out.println("\n\n\n\n------------------- Welcome to the Menu -------------------\n\n\n\n");
+                System.out.println("1. Show number of documents that matched.");
+                System.out.println("2. From and to emails.");
+                System.out.println("3. Query in context");
+                System.out.println("4. Get top k topics in the emails");
+                System.out.println("Enter which choice you wanna pick(1,2,3) or any other num for exit.");
+                choice = key.next();
+                if(choice.equals("1")){
+                    System.out.println("Emails matching : " + emails.getNumFound());
+                }
+                else if(choice.equals("2")){
+                    //prints from and to emails
+                    System.out.println("Number of Emails matching: " + emails.getNumFound() + ".\n Senders and recievers below\n");
+                    printEmailTable(emails);
+                }
+                else if(choice.equals("3")){
+                    //prints query in context
+                    System.out.println("Query in context");
+                    printQueryInContext(emails,searchPhrase);
+                }
+                else if(choice.equals("4")){
+                    //prints topics from the email
+                    System.out.println("Top k topics");
+                    //Analyse emails
+                    AnalyseTopics(emails);
+                }
+            }
         } catch (SolrServerException e) {
             e.printStackTrace();
         } catch (IOException e) {

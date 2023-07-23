@@ -43,3 +43,8 @@ Running the project in local
    1. Number of documents matched with the keyword
    2. Emails from and to
    3. Top k topics
+
+
+Test cases
+-----------
+1. Run the Querytool, select the choice for number of documents
